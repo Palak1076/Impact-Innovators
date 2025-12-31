@@ -4,6 +4,9 @@ node_modules/
 .env.production
 logs/
 dist/
-google-credentials.json
+temp/
 test-outputs/
-
+google-credentials.json
+uploads/
+*.mp4
+*.jpg
