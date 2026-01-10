@@ -44,6 +44,13 @@ app.use(cors({
   credentials: true
 }));
 
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+  methods: ["GET", "POST","PUT","DELETE"],
+  credentials: true
+}));
+
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(logger.requestLogger);
@@ -60,7 +67,7 @@ app.use('/api/study', studyRoutes);
 app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
-app.use('/api/files', uploadRoutes);
+app.use('/api/test', require('./routes/testRoutes'));
 
 /* ===================== HEALTH CHECK ===================== */
 
