@@ -67,7 +67,7 @@ app.use('/api/study', studyRoutes);
 app.use('/api/flashcards', flashcardRoutes);
 app.use('/api/groups', groupRoutes);
 app.use('/api/resources', resourceRoutes);
-app.use('/api/test', require('./routes/testRoutes'));
+//app.use('/api/test', require('./routes/testRoutes'));
 
 /* ===================== HEALTH CHECK ===================== */
 
