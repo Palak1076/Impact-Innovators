@@ -95,6 +95,8 @@ import Navbar from "./components/Navbar";
 import Layout from "./components/Layout";
 
 import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
+
 import Dashboard from "./pages/Dashboard";
 import Summarizer from "./pages/Summarizer";
 import Flashcards from "./pages/Flashcards";
@@ -110,7 +112,7 @@ function App() {
           <Routes>
             {/* ================= PUBLIC ROUTES ================= */}
             <Route path="/login" element={<Login />} />
-
+            <Route path="/register" element={<Register />} />
             {/* ================= PROTECTED ROUTES ================= */}
             <Route
               path="/"
