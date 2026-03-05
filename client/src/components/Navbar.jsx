@@ -25,7 +25,7 @@ export default function Navbar() {
           onClick={() => navigate("/dashboard")}
           className="text-xl font-bold text-indigo-600 dark:text-indigo-400 cursor-pointer"
         >
-          StudyAssistant
+          Student Assistant
         </div>
 
         {/* Desktop Links */}
