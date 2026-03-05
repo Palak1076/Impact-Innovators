@@ -1,9 +1,9 @@
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext } from "react";
 import { AuthContext } from "../../context/AuthContext";
 import { useNavigate, Link } from "react-router-dom";
 
 function Register() {
-  const { register, googleSignIn } = useContext(AuthContext);
+  const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -15,31 +15,15 @@ function Register() {
   });
 
   const [passwordStrength, setPasswordStrength] = useState("");
-  const [otpSent, setOtpSent] = useState(false);
-  const [otp, setOtp] = useState("");
-  const [resendTimer, setResendTimer] = useState(30);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   /* ---------------- Password Strength ---------------- */
   const getPasswordStrength = (password) => {
     if (password.length < 6) return "Weak";
-    if (
-      /[A-Z]/.test(password) &&
-      /\d/.test(password) &&
-      /[^A-Za-z0-9]/.test(password)
-    )
+    if (/[A-Z]/.test(password) && /\d/.test(password) && /[^A-Za-z0-9]/.test(password))
       return "Strong";
     return "Medium";
   };
-
-  /* ---------------- Resend OTP Timer ---------------- */
-  useEffect(() => {
-    if (otpSent && resendTimer > 0) {
-      const timer = setTimeout(() => {
-        setResendTimer((t) => t - 1);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [otpSent, resendTimer]);
 
   /* ---------------- Input Handler ---------------- */
   const handleChange = (e) => {
@@ -51,7 +35,7 @@ function Register() {
     }
   };
 
-  /* ---------------- Submit (Send OTP) ---------------- */
+  /* ---------------- Submit (Register & Send Verification Link) ---------------- */
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -60,37 +44,17 @@ function Register() {
       return;
     }
 
+    setIsSubmitting(true);
     try {
-      await register({ ...formData, sendOtp: true });
-      setOtpSent(true);
-      setResendTimer(30);
+      // Assuming your backend 'register' now handles sending a verification email
+      await register({ ...formData });
+      
+      alert("Registration successful! Please check your email to verify your account.");
+      navigate("/login"); // Redirect to login after successful registration
     } catch (err) {
-      alert("Failed to send OTP");
-    }
-  };
-
-  /* ---------------- Verify OTP ---------------- */
-  const verifyOtp = async () => {
-    try {
-      await register({
-        ...formData,
-        otp,
-        verifyOtp: true
-      });
-      navigate("/dashboard");
-    } catch (err) {
-      alert("Invalid OTP");
-    }
-  };
-
-  /* ---------------- Resend OTP ---------------- */
-  const resendOtp = async () => {
-    try {
-      await register({ email: formData.email, resendOtp: true });
-      setResendTimer(30);
-      alert("OTP resent successfully");
-    } catch (err) {
-      alert("Failed to resend OTP");
+      alert(err.response?.data?.message || "Failed to register. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -100,139 +64,82 @@ function Register() {
         onSubmit={handleSubmit}
         className="bg-white p-8 rounded shadow-md w-96"
       >
-        <h1 className="text-2xl font-semibold text-center mb-4">
-          {otpSent ? "Verify OTP" : "Register"}
-        </h1>
+        <h1 className="text-2xl font-semibold text-center mb-6">Create Account</h1>
 
-        {/* ---------------- REGISTER FORM ---------------- */}
-        {!otpSent && (
-          <>
-            <input
-              type="text"
-              name="name"
-              placeholder="Full Name"
-              onChange={handleChange}
-              className="border p-2 w-full mb-3 rounded"
-              required
-            />
+        <div className="space-y-4">
+          <input
+            type="text"
+            name="name"
+            placeholder="Full Name"
+            onChange={handleChange} 
+            className="border p-2 w-full rounded focus:ring-2 focus:ring-purple-500 outline-none"
+            required
+          />
 
-            <input
-              type="text"
-              name="username"
-              placeholder="Username"
-              onChange={handleChange}
-              className="border p-2 w-full mb-3 rounded"
-              required
-            />
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            onChange={handleChange}
+            className="border p-2 w-full rounded focus:ring-2 focus:ring-purple-500 outline-none"
+          />
 
-            <input
-              type="email"
-              name="email"
-              placeholder="Email"
-              onChange={handleChange}
-              className="border p-2 w-full mb-3 rounded"
-              required
-            />
+          <input
+            type="email"
+            name="email"
+            placeholder="Email Address"
+            onChange={handleChange}
+            className="border p-2 w-full rounded focus:ring-2 focus:ring-purple-500 outline-none"
+            required
+          />
 
+          <div>
             <input
               type="password"
               name="password"
               placeholder="Password"
               onChange={handleChange}
-              className="border p-2 w-full mb-1 rounded"
+              className="border p-2 w-full rounded focus:ring-2 focus:ring-purple-500 outline-none"
               required
             />
-
             {passwordStrength && (
-              <p
-                className={`text-sm mb-3 ${
-                  passwordStrength === "Weak"
-                    ? "text-red-500"
-                    : passwordStrength === "Medium"
-                    ? "text-yellow-500"
-                    : "text-green-600"
-                }`}
-              >
-                Password Strength: {passwordStrength}
+              <p className={`text-xs mt-1 font-medium ${
+                passwordStrength === "Weak" ? "text-red-500" : 
+                passwordStrength === "Medium" ? "text-yellow-500" : "text-green-600"
+              }`}>
+                Strength: {passwordStrength}
               </p>
             )}
+          </div>
 
+          <div className="flex flex-col">
+            <label className="text-sm text-gray-600 mb-1">Date of Birth</label>
             <input
               type="date"
               name="dob"
               onChange={handleChange}
-              className="border p-2 w-full mb-4 rounded"
+              className="border p-2 w-full rounded focus:ring-2 focus:ring-purple-500 outline-none"
               required
             />
+          </div>
 
-            <button
-              type="submit"
-              className="bg-purple-600 text-white p-2 w-full rounded hover:bg-purple-700"
-            >
-              Register & Send OTP
-            </button>
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className={`w-full text-white p-2 rounded transition-colors ${
+              isSubmitting ? "bg-purple-400 cursor-not-allowed" : "bg-purple-600 hover:bg-purple-700"
+            }`}
+          >
+            {isSubmitting ? "Processing..." : "Register & Verify Email"}
+          </button>
+        </div>
 
-            <button
-              type="button"
-              onClick={googleSignIn}
-              className="mt-3 border p-2 w-full rounded flex items-center justify-center gap-2 hover:bg-gray-100"
-            >
-              <img
-                src="https://developers.google.com/identity/images/g-logo.png"
-                alt="Google"
-                className="w-5 h-5"
-              />
-              Sign up with Google
-            </button>
-
-            <p className="text-sm text-center mt-4">
-              Already have an account?{" "}
-              <Link
-                to="/login"
-                className="text-purple-600 font-medium hover:underline"
-              >
-                Login
-              </Link>
-            </p>
-          </>
-        )}
-
-        {/* ---------------- OTP VERIFICATION ---------------- */}
-        {otpSent && (
-          <>
-            <input
-              type="text"
-              placeholder="Enter 6-digit OTP"
-              value={otp}
-              onChange={(e) => setOtp(e.target.value)}
-              className="border p-2 w-full mb-4 rounded"
-            />
-
-            <button
-              type="button"
-              onClick={verifyOtp}
-              className="bg-green-600 text-white p-2 w-full rounded hover:bg-green-700"
-            >
-              Verify OTP
-            </button>
-
-            <div className="text-center mt-3 text-sm">
-              {resendTimer > 0 ? (
-                <p className="text-gray-500">
-                  Resend OTP in {resendTimer}s
-                </p>
-              ) : (
-                <button
-                  type="button"
-                  onClick={resendOtp}
-                  className="text-purple-600 font-medium hover:underline"
-                >
-                  Resend OTP
-                </button>
-              )}
-            </div>
-          </>
-        )}
+        <p className="text-sm text-center mt-6">
+          Already have an account?{" "}
+          <Link to="/login" className="text-purple-600 font-medium hover:underline">
+            Login
+          </Link>
+        </p>
       </form>
     </div>
   );
